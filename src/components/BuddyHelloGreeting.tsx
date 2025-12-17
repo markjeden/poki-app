@@ -14,7 +14,7 @@ function BuddyHelloGreeting({
       <View style={[styles.container, style]}>
         <Image style={[styles.imageCut]} source={require('./../assets/images/purple-cuts-small.png')} />
         <Text>Hi! I am here to answer your queries.</Text>
-        <Image style={[styles.imageBuddy]} source={require('./../assets/images/esar-charactor.png')} />
+        <Image style={[styles.imageBuddy]} source={require('./../assets/images/poki-charactor.png')} />
       </View>
     </>
   );

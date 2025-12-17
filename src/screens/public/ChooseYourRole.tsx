@@ -8,32 +8,14 @@
 import React, { useState } from 'react';
 import {
     Image,
-    ScrollView,
-    StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
-    useColorScheme,
     View,
     ImageBackground,
     ImageSourcePropType
 } from 'react-native';
-
-import {
-    Colors,
-    DebugInstructions,
-    Header,
-    LearnMoreLinks,
-    ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-import Icon from 'react-native-vector-icons/Ionicons';
-import BuddyContainer from '../../components/BuddyContainer';
-import { colors, screenHeight, screenWidth } from '../../utils/Constants';
-import BuddyCard from '../../components/BuddyCard';
-import BuddyButton from '../../components/BuddyButton';
-import BuddyLang from '../../components/BuddyLang';
 import { useNavigation } from '@react-navigation/native';
-import Bg3 from "./../../assets/images/bg3.png";
 import Bg from "./../../assets/images/bg-light.png";
 import WelcomeImage from "./../../assets/images/logo.png";
 import Collector from "./../../assets/images/collector.png"
@@ -79,6 +61,12 @@ function ChooseYourRole(): React.JSX.Element {
         setSelected(id);
     };
 
+    const signup = () => {
+        if(selected === 'collector') navigation.navigate('signup-collector')
+        if(selected === 'vendor') navigation.navigate('signup-vendor')
+        if(selected === 'creator') navigation.navigate('signup-creator')
+    }
+
     return <>
         <ImageBackground
             source={Bg}
@@ -121,10 +109,10 @@ function ChooseYourRole(): React.JSX.Element {
                         </TouchableOpacity>
                     );
                 })}
-                </View>
+            </View>
 
             <View style={styles.buttonView}>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={() => signup()}>
                     <Text style={styles.text}>Continue</Text>
                 </TouchableOpacity>
             </View>
@@ -185,7 +173,8 @@ const styles = StyleSheet.create({
     buttonView: {
         alignItems: 'flex-end',
         justifyContent: 'flex-end',
-        flex: 1,
+        // flex: 1,
+        marginTop: 15
     },
     button: {
         padding: 18.751,
@@ -273,7 +262,6 @@ const styles = StyleSheet.create({
         fontWeight: 500,
         fontStyle: 'normal',
         lineHeight: 16,
-        
     }
 });
 

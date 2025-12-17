@@ -55,7 +55,7 @@ function GetStarted(): React.JSX.Element {
                     <Text style={styles.text}>Get Started</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.lbutton}>
+                <TouchableOpacity style={styles.lbutton} onPress={() => navigation.navigate('login')}>
                     <Text style={styles.ltext}>Login</Text>
                 </TouchableOpacity>
             </View>

@@ -19,7 +19,7 @@ export const colors = {
 };
 
 export const routes = {
-    baseUrl: `https://services83.demowebsitelinks.com/esar-backend/public/api/`,
+    baseUrl: `https://services83.demowebsitelinks.com/poki-backend/public/api/`,
     register: `register`,
     login: `login`,
     forgotPassword: `forgot-password`,

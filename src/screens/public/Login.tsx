@@ -1,277 +1,315 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ImageBackground,
+  Dimensions,
+} from "react-native";
 import { useForm, Controller } from "react-hook-form";
-import { Picker } from "@react-native-picker/picker";
-import { useNavigation } from "@react-navigation/native";
-import { LoginAPI } from "../../store/actions/auth";
-import LogoBig from "./../../assets/images/big-logo.png";
+import { useNavigation } from '@react-navigation/native';
+import RingSwitch from "../../components/RingSwitch";
 
-export default function LoginScreen() {
+import Bg from "./../../assets/images/bg-light.png";
+import WelcomeImage from "./../../assets/images/logo.png";
+import Google from "./../../assets/images/google.png";
+import Apple from "./../../assets/images/apple.png";
+import Eyeslash from "./../../assets/images/eye-slash.png";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+type LoginFormData = {
+  email: string;
+  password: string;
+  remember: boolean;
+};
+
+function Login(): React.JSX.Element {
   const navigation = useNavigation();
-  const { control, handleSubmit, formState: { errors }, setError } = useForm();
-  const [passwordVisible, setPasswordVisible] = useState(false);
+  const { control, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
+  const [secure, setSecure] = useState(true);
+  const [enabled, setEnabled] = useState(true);
 
-  // On login submit
-  const onLoginAction = async (data) => {
-    const { email, password } = data;
-
-    try {
-      const response = await LoginAPI({ email, password });
-      console.log("Login successful:", response);
-      // Navigate to home screen after successful login
-
-      navigation.navigate('home', { country: response?.region ?? '' });
-      // navigation.navigate('home', { country: region });
-    } catch (err) {
-      console.log("Login error:", err);
-      // setError("email", { type: "manual", message: "Invalid credentials" });
-    }
+  const onSubmit = (data: LoginFormData) => {
+    console.log("Login Data:", data);
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      
-      {/* Logo */}
-      <Image source={LogoBig} style={styles.logo} />
+    <ImageBackground source={Bg} style={styles.wrapper}>
+      <View style={styles.titleView}>
+        <Image source={WelcomeImage} style={styles.titleImage} />
+        <Text style={styles.titleText}>PokiStock</Text>
+      </View>
 
-      <Text style={styles.slogan}>
-        "COMPASSION, COMFORT, CONNECTION"
-      </Text>
+      <View style={styles.roleTitleView}>
+        <Text style={styles.roleTitle}>login</Text>
+        <Text style={styles.roleSubTitle}>Sign in to your account</Text>
+      </View>
 
-      <View style={styles.innercontainer}>
-        <Text style={styles.description}>
-          Welcome to the Emotional Support Animals Registry! Your trusted platform for managing your ESA documentation and membership.
-        </Text>
-
-        <TouchableOpacity style={styles.memberBtn} onPress={() => navigation.navigate('register')}>
-          <Text style={styles.memberBtnText}>MEMBER REGISTER</Text>
-        </TouchableOpacity>
-
-        {/* Email */}
-        <Text style={styles.label}>EMAIL*</Text>
+      {/* Email Input */}
+      <View style={styles.inputWrapper}>
+        <Text style={styles.inputText}>Email Address*</Text>
         <Controller
           control={control}
-          rules={{
-            required: "Email is required",
-            pattern: {
-              value: /^\S+@\S+\.\S+$/,
-              message: "Please enter a valid email address",
-            },
-          }}
+          name="email"
+          rules={{ required: true }}
           render={({ field: { onChange, value } }) => (
             <TextInput
-              // placeholder="example@example.com"
-              // placeholderTextColor="#fff"
               style={styles.input}
+              placeholder="Enter email address"
+              placeholderTextColor="#fff"
+              keyboardType="email-address"
+              autoCapitalize="none"
               value={value}
               onChangeText={onChange}
             />
           )}
-          name="email"
         />
-        {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+      </View>
+      {errors.email && <Text style={styles.error}>Email is required</Text>}
 
-        {/* Password */}
-        <Text style={styles.label}>PASSWORD*</Text>
-        <Controller
-          control={control}
-          rules={{
-            required: "Password is required",
-            minLength: {
-              value: 6,
-              message: "Password must be at least 6 characters long",
-            },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <View style={styles.passwordBox}>
+      {/* Password Input */}
+      <View style={styles.passwordWrapper}>
+        <Text style={styles.inputText}>Password*</Text>
+        <View style={styles.passwordBox}>
+          <Controller
+            control={control}
+            name="password"
+            rules={{ required: true }}
+            render={({ field: { onChange, value } }) => (
               <TextInput
-                // placeholder="***********"
-                // placeholderTextColor="#fff"
-                secureTextEntry={!passwordVisible}
-                style={styles.inputPassword}
+                style={styles.passwordInput}
+                placeholder="Enter password"
+                placeholderTextColor="#fff"
+                secureTextEntry={secure}
                 value={value}
                 onChangeText={onChange}
               />
-              <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-                {passwordVisible ?
-                  <Image style={styles.eyeIcon} source={require('./../../assets/images/close-eye.png')} /> :
-                  <Image style={styles.eyeIcon} source={require('./../../assets/images/open-eye.png')} />
-                }
-              </TouchableOpacity>
-            </View>
-          )}
-          name="password"
-        />
-        {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
-
-        {/* Region */}
-        {/* <Text style={styles.label}>REGION*</Text>
-        <Controller
-          control={control}
-          name="region"
-          rules={{ required: "Region is required" }}
-          render={({ field: { onChange, value } }) => (
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={value}
-                onValueChange={(itemValue) => onChange(itemValue)}
-                style={styles.picker}
-                dropdownIconColor="#fff"
-              >
-                <Picker.Item style={styles.pickerItemText} label="Select Your Region" value="" />
-                <Picker.Item style={styles.pickerItemText} label="USA" value="usa" />
-                <Picker.Item style={styles.pickerItemText} label="EU" value="eu" />
-                <Picker.Item style={styles.pickerItemText} label="UK" value="uk" />
-              </Picker>
-            </View>
-          )}
-        />
-        {errors.region && <Text style={styles.errorText}>{errors.region.message}</Text>} */}
-
-        {/* Login Button */}
-        <TouchableOpacity style={styles.loginBtn} onPress={handleSubmit(onLoginAction)}>
-          <Text style={styles.loginBtnText}>LOG IN</Text>
-        </TouchableOpacity>
-
-        {/* <TouchableOpacity onPress={() => navigation.navigate('forgot-password')}>
-          <Text style={styles.forgotText}>FORGOT PASSWORD</Text>
-        </TouchableOpacity> */}
-
-        {/* <TouchableOpacity onPress={() => navigation.navigate('email-verification')}>
-          <Text style={styles.forgotText}>EMAIL VERIFICATION</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('reset-your-password')}>
-          <Text style={styles.forgotText}>RESET YOUR PASSWORD</Text>
-        </TouchableOpacity> */}
-        
+            )}
+          />
+          <TouchableOpacity
+            style={styles.eyeButton}
+            onPress={() => setSecure(!secure)}
+          >
+            <Image source={Eyeslash} style={styles.eyeImage} />
+          </TouchableOpacity>
+        </View>
       </View>
-    </ScrollView>
+      {errors.password && <Text style={styles.error}>Password is required</Text>}
+
+      {/* Remember Me / Forgot */}
+      <View style={styles.row}>
+        <View style={styles.rememberRow}>
+          <RingSwitch value={enabled} onChange={setEnabled} />
+          <Text style={styles.rememberText}>Remember me</Text>
+        </View>
+        <TouchableOpacity>
+          <Text style={styles.forgotText}>Forgot Password?</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Login Button */}
+      <View style={styles.buttonView}>
+        <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.orText}>Or Sign Up With</Text>
+
+      {/* Social Buttons */}
+      <View style={styles.socialRow}>
+        <TouchableOpacity style={styles.socialButton}>
+          <Image source={Google} style={styles.socialImage} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.socialButton}>
+          <Image source={Apple} style={styles.socialImage} />
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.signupText}>
+        Not a user? <Text style={styles.signupLink}>Sign up</Text>
+      </Text>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#14135F",
+  wrapper: {
+    flex: 1,
+    backgroundColor: '#000',
+    paddingHorizontal: screenWidth * 0.05,
+    paddingVertical: screenHeight * 0.03,
   },
-  innercontainer: {
-    padding: 15,
-    alignItems: "center",
-    justifyContent: "center",
+  titleView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  logo: {
-    width: 250,
-    height: 250,
-    resizeMode: "contain",
-    marginHorizontal: 'auto'
+  titleImage: {
+    width: screenWidth * 0.15,
+    height: screenHeight * 0.07,
+    resizeMode: 'contain',
   },
-  slogan: {
-    backgroundColor: "#1689FE",
-    color: "#fff",
-    fontWeight: "600",
-    marginBottom: 10,
-    fontSize: 16,
-    textAlign: "center",
-    padding: 10
+  titleText: {
+    color: '#fff',
+    fontFamily: 'Clash Display',
+    fontSize: screenWidth * 0.08,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    marginLeft: screenWidth * 0.02,
+    top: screenHeight * 0.006,
   },
-  description: {
-    color: "#d3e4ff",
-    fontSize: 10,
-    textAlign: "center",
-    marginBottom: 20,
-    lineHeight: 18,
+  roleTitleView: {
+    marginTop: screenHeight * 0.03,
   },
-  memberBtn: { 
-    backgroundColor: "#1689FE", 
-    paddingVertical: 8, 
-    paddingHorizontal: 16, 
-    marginBottom: 20, 
-  }, 
-  memberBtnText: { 
-    color: "#fff", 
-    fontWeight: "600", 
-    fontSize: 10, 
+  roleTitle: {
+    color: '#fff',
+    fontFamily: 'Clash Display',
+    fontSize: screenWidth * 0.06,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    textAlign: 'center',
   },
-  label: {
-    color: "#fff",
-    alignSelf: "flex-start",
-    marginBottom: 5,
-    fontSize: 12,
-    marginTop: 10,
+  roleSubTitle: {
+    color: '#fff',
+    fontFamily: 'Inter',
+    fontSize: screenWidth * 0.035,
+    fontWeight: '500',
+    marginTop: screenHeight * 0.01,
+    textAlign: 'center',
+  },
+  inputWrapper: {
+    marginTop: screenHeight * 0.03,
+  },
+  inputText: {
+    color: '#fff',
+    fontSize: screenWidth * 0.035,
+    marginBottom: screenHeight * 0.01,
+    fontFamily: 'Poppins',
   },
   input: {
-    backgroundColor: "#1689FE1F",
-    width: "100%",
-    height: 45,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    color: "#fff",
-    marginBottom: 5,
-    fontSize: 12,
+    borderRadius: screenWidth * 0.01,
+    borderWidth: 1,
+    borderColor: "#FFD748",
+    backgroundColor: 'rgba(15,15,15,0.08)',
+    height: screenHeight * 0.07,
+    paddingHorizontal: screenWidth * 0.05,
+    color: '#fff',
+    fontFamily: 'Inter',
+    fontSize: screenWidth * 0.035,
+  },
+  passwordWrapper: {
+    marginTop: screenHeight * 0.03,
   },
   passwordBox: {
-    backgroundColor: "#1689FE1F",
-    width: "100%",
-    height: 45,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    marginBottom: 5,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    borderColor: "#FFD748",
+    borderWidth: 1,
+    borderRadius: screenWidth * 0.01,
+    backgroundColor: 'rgba(15,15,15,0.08)',
   },
-  inputPassword: {
+  passwordInput: {
     flex: 1,
     color: "#fff",
-    fontSize: 12,
+    height: screenHeight * 0.07,
+    paddingHorizontal: screenWidth * 0.05,
+    fontFamily: 'Inter',
+    fontSize: screenWidth * 0.035,
   },
-  pickerContainer: {
-    backgroundColor: "#1689FE1F",
-    borderRadius: 8,
-    width: "100%",
-    // marginBottom: 20,
-    paddingLeft: 15,
-    fontSize: 12,
-    color: "#fff",
+  eyeButton: {
+    paddingHorizontal: screenWidth * 0.03,
   },
-  picker: {
-    width: "100%",
-    borderRadius: 8,
-    color: "#fff",
-    fontSize: 12,
+  eyeImage: {
+    width: screenWidth * 0.05,
+    height: screenWidth * 0.05,
+    resizeMode: 'contain',
   },
-  pickerItemText: {
-    fontSize: 12,
-  },
-  loginBtn: {
-    backgroundColor: "#2ea8ff",
-    paddingVertical: 15,
-    width: "50%",
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    borderRadius: 30,
-    marginBottom: 10,
-    marginTop: 20,
+    marginVertical: screenHeight * 0.015,
   },
-  loginBtnText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
+  rememberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  rememberText: {
+    color: '#fff',
+    fontSize: screenWidth * 0.03,
+    marginLeft: screenWidth * 0.02,
   },
   forgotText: {
-    color: "#8fbaff",
-    marginTop: 5,
-    fontSize: 12,
+    color: '#fff',
+    fontSize: screenWidth * 0.03,
+    borderBottomColor: '#fff',
+    borderBottomWidth: 1,
   },
-  eyeIcon: {
-    paddingHorizontal: 8,
-    width: 20,
-    resizeMode: 'contain'
+  buttonView: {
+    marginTop: screenHeight * 0.03,
   },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginBottom: 10,
-    alignSelf: 'flex-start',
+  button: {
+    width: '100%',
+    paddingVertical: screenHeight * 0.02,
+    borderRadius: screenWidth * 0.13,
+    borderWidth: 2,
+    borderColor: '#FFD748',
+    backgroundColor: '#010000',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: screenWidth * 0.045,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    textAlign: 'center',
+  },
+  orText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: screenWidth * 0.035,
+    fontWeight: '500',
+    marginVertical: screenHeight * 0.025,
+  },
+  socialRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: screenWidth * 0.05,
+    marginBottom: screenHeight * 0.02,
+  },
+  socialButton: {
+    width: screenWidth * 0.12,
+    height: screenWidth * 0.12,
+    borderRadius: screenWidth * 0.06,
+    borderWidth: 1,
+    borderColor: "#fff",
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  socialImage: {
+    width: screenWidth * 0.06,
+    height: screenWidth * 0.06,
+    resizeMode: 'contain',
+  },
+  signupText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: screenWidth * 0.03,
+  },
+  signupLink: {
+    color: "#FFD748",
+  },
+  error: {
+    color: "#ff5c5c",
+    fontSize: screenWidth * 0.03,
+    marginVertical: screenHeight * 0.005,
   },
 });
+
+export default Login;
