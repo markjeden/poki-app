@@ -19,6 +19,7 @@ import WelcomeImage from "./../../assets/images/logo.png";
 
 import Eyeslash from "./../../assets/images/eye-slash.png";
 import Vendor from "./../../assets/images/vendor.png";
+import { screenHeight } from "../../utils/Constants";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -284,7 +285,9 @@ const styles = StyleSheet.create({
   wrapper: {
     backgroundColor: "#000000ff",
     flex: 1,
-    padding: 40,
+    // padding: 40,
+    paddingHorizontal: screenWidth * 0.05,
+    paddingVertical: screenHeight * 0.03,
   },
   scrollContainer: {
     paddingBottom: 60,

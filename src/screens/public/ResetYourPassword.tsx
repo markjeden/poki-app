@@ -1,223 +1,335 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, TextInput } from "react-native";
-import Back from "./../../assets/images/back.png";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ImageBackground,
+  Dimensions,
+  Modal,
+} from "react-native";
+import { useForm, Controller } from "react-hook-form";
+import { useNavigation } from '@react-navigation/native';
 
-export default function ResetYourPasswordScreen({ navigation }) {
-    const [passwordVisible, setPasswordVisible] = useState(false);
-    const [confirmedPasswordVisible, setConfirmedPasswordVisible] = useState(false);
+import Bg from "./../../assets/images/bg-light.png";
+import LeftArrow from "./../../assets/images/left-arrow.png";
+import Eyeslash from "./../../assets/images/eye-slash.png";
+import CheckMark from "./../../assets/images/check-mark.png";
 
-    return (
-        <ScrollView contentContainerStyle={styles.container}>
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-        <View style={styles.pageTitleContainer}>
-            {/* Back Button */}
-            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-              <Image source={Back} style={styles.back} />
-            </TouchableOpacity>
-    
-            {/* PAGE TITLE */}
-            <Text style={styles.pageTitle}>RESET PASSWORD</Text>
-          </View>
+type ResetYourPasswordFormData = {
+  password: string;
+  confirmPassword: string;
+};
 
-        <View style={styles.innercontainer}>
-            {/* Title */}
-            <Text style={styles.title}>
-                ENTER NEW PASSWORD
-            </Text>
+function ResetYourPassword(): React.JSX.Element {
+  const navigation = useNavigation();
+  const [secure, setSecure] = useState(true);
+  const [confirmSecure, setConfirmSecure] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
 
-            {/* Description */}
-            <Text style={styles.description}>
-                Your New Password Must Be Different From Previously Used Password.
-            </Text>
+  const { 
+    control, 
+    handleSubmit, 
+    watch, 
+    formState: { errors } 
+  } = useForm<ResetYourPasswordFormData>({
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    }
+  });
 
-            {/* Password */}
-            <Text style={styles.label}>PASSWORD*</Text>
-            <View style={styles.passwordBox}>
-                <TextInput
-                placeholder="***********"
-                placeholderTextColor="#fff"
-                secureTextEntry={!passwordVisible}
-                style={styles.inputPassword}
-                />
-                <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-                {
-                    passwordVisible ?
-                    <Image style={[styles.eyeIcon]} source={require('./../../assets/images/close-eye.png')} /> :
-                    <Image style={[styles.eyeIcon]} source={require('./../../assets/images/open-eye.png')} />
-                }
-                </TouchableOpacity>
-            </View>
+  const passwordValue = watch("password");
+  const confirmPasswordValue = watch("confirmPassword");
+  const passwordsMatch = passwordValue === confirmPasswordValue && passwordValue !== "";
 
-            {/* Password */}
-            <Text style={styles.label}>CONFIRMED PASSWORD*</Text>
-            <View style={styles.passwordBox}>
-                <TextInput
-                placeholder="***********"
-                placeholderTextColor="#fff"
-                secureTextEntry={!confirmedPasswordVisible}
-                style={styles.inputPassword}
-                />
-                <TouchableOpacity onPress={() => setConfirmedPasswordVisible(!confirmedPasswordVisible)}>
-                {
-                    confirmedPasswordVisible ?
-                    <Image style={[styles.eyeIcon]} source={require('./../../assets/images/close-eye.png')} /> :
-                    <Image style={[styles.eyeIcon]} source={require('./../../assets/images/open-eye.png')} />
-                }
-                </TouchableOpacity>
-            </View>
+  const onSubmit = (data: ResetYourPasswordFormData) => {
+    console.log("New Password Data:", data);
+    setModalVisible(true);
+  };
 
-            {/* Button */}
-            <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('home')}>
-            <Text style={styles.btnText}>CHANGE PASSWORD</Text>
-            </TouchableOpacity>
+  const handleModalAction = () => {
+    setModalVisible(false);
+    navigation.navigate('login' as never);
+  };
+
+  return (
+    <ImageBackground source={Bg} style={styles.wrapper}>
+      <View style={styles.roleTitleView}>
+        <View style={styles.roleTitleBox}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image source={LeftArrow} style={styles.leftArrowImage} />
+          </TouchableOpacity>
+          <Text style={styles.roleTitle}>Create New password</Text>
         </View>
+        <Text style={styles.roleSubTitle}>
+          set a new password for your account.
+        </Text>
+      </View>
 
-        </ScrollView>
-    );
+      {/* New Password Input */}
+      <View style={styles.passwordWrapper}>
+        <Text style={styles.inputText}>New Password*</Text>
+        <View style={styles.passwordBox}>
+          <Controller
+            control={control}
+            name="password"
+            rules={{ 
+              required: "Password is required",
+              minLength: { value: 6, message: "Minimum 6 characters" }
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Enter new password"
+                placeholderTextColor="#aaa"
+                secureTextEntry={secure}
+                value={value}
+                onChangeText={onChange}
+              />
+            )}
+          />
+          <TouchableOpacity style={styles.eyeButton} onPress={() => setSecure(!secure)}>
+            <Image source={Eyeslash} style={styles.eyeImage} />
+          </TouchableOpacity>
+        </View>
+        {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
+      </View>
+
+      {/* Confirm Password Input */}
+      <View style={styles.passwordWrapper}>
+        <Text style={styles.inputText}>Confirm Password*</Text>
+        <View style={styles.passwordBox}>
+          <Controller
+            control={control}
+            name="confirmPassword"
+            rules={{ 
+              required: "Please confirm your password",
+              validate: (value) => value === passwordValue || "Passwords do not match"
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Confirm new password"
+                placeholderTextColor="#aaa"
+                secureTextEntry={confirmSecure}
+                value={value}
+                onChangeText={onChange}
+              />
+            )}
+          />
+          <TouchableOpacity style={styles.eyeButton} onPress={() => setConfirmSecure(!confirmSecure)}>
+            <Image source={Eyeslash} style={styles.eyeImage} />
+          </TouchableOpacity>
+        </View>
+        {errors.confirmPassword && <Text style={styles.error}>{errors.confirmPassword.message}</Text>}
+      </View>
+
+      {/* Main Update Button */}
+      <View style={styles.buttonView}>
+        <TouchableOpacity 
+          style={[styles.button, !passwordsMatch && { opacity: 0.8 }]} 
+          onPress={handleSubmit(onSubmit)}
+        >
+          <Text style={styles.buttonText}>Update Password</Text>
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity onPress={() => navigation.navigate('login' as never)}>
+        <Text style={styles.signupText}>
+          Back To <Text style={styles.signupLink}>Login</Text>
+        </Text>
+      </TouchableOpacity>
+
+      {/* Success Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.successCircle}>
+              <Image source={CheckMark} />
+            </View>
+            
+            <Text style={styles.modalTitleText}>
+                Password updated {'\n'}Successfully!
+            </Text>
+
+            <TouchableOpacity 
+                style={styles.modalButton} 
+                onPress={handleModalAction}
+            >
+              <Text style={styles.modalButtonText}>UPDATE PASSWORD</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </ImageBackground>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#14135F",
-    padding: 20,
-    paddingTop: 50,
-    flexGrow: 1,
-  },
-  pageTitleContainer: {
-    position: 'relative',
-    marginBottom: 15
-  },
-  pageTitle: {
-    color: "#1689FE",
-    fontSize: 20,
-    fontWeight: 600,
-    lineHeight: 24,
-    textAlign: 'center'
-  },
-  innercontainer: {
-    paddingVertical: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backBtn: {
-    width: 25,
-    height: 25,
-    position: 'absolute',
-    zIndex: 999
-  },
-  back: {
-    width: 25,
-    height: 25,
-    resizeMode: "contain",
-  },
-  flag: {
-    width: 45,
-    height: 45,
-    position: "absolute",
-    right: 60,
-    top: 20,
-    borderRadius: 50,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 14,
-    textAlign: "center",
-    width: "90%",
-    alignSelf: "center",
-    lineHeight: 18,
-    marginBottom: 5,
-    fontWeight: 600
-  },
-  description: {
-    color: "#fff",
-    fontSize: 10,
-    textAlign: "center",
-    width: "90%",
-    alignSelf: "center",
-    lineHeight: 18,
-    marginBottom: 18,
-  },
-  mainButton: {
-    backgroundColor: "#1b71d2",
-    alignSelf: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-    marginBottom: 25,
-  },
-  mainButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 10,
-  },
-  cardList: {
-    gap: 12,
-  },
-  card: {
-    backgroundColor: "#1689FE1F",
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 15,
-    borderRadius: 10,
-    gap: 12,
-  },
-  cardActive: {
-    backgroundColor: "#2ea8ff",
-  },
-  cardText: {
+  wrapper: {
     flex: 1,
-    color: "#fff",
-    fontWeight: "600",
+    backgroundColor: '#000',
+    paddingHorizontal: screenWidth * 0.05,
+    paddingVertical: screenHeight * 0.03,
   },
-  label: {
-    color: "#fff",
-    alignSelf: "flex-start",
-    marginBottom: 5,
-    fontSize: 12,
-    marginTop: 10,
+  roleTitleView: {
+    marginTop: screenHeight * 0.1,
   },
-  input: {
-    backgroundColor: "#1689FE1F",
-    width: "100%",
-    height: 45,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    color: "#fff",
-    marginBottom: 30,
-    fontSize: 12,
+  roleTitleBox: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  leftArrowImage: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+  },
+  roleTitle: {
+    color: '#fff',
+    fontFamily: 'Clash Display',
+    fontSize: screenWidth * 0.06,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    flex: 1,
+    marginRight: 24,
+  },
+  roleSubTitle: {
+    color: '#fff',
+    fontFamily: 'Inter',
+    fontSize: screenWidth * 0.035,
+    fontWeight: '500',
+    marginTop: screenHeight * 0.03,
+    textAlign: 'center',
+    lineHeight: 20,
+    textTransform: 'capitalize'
+  },
+  inputText: {
+    color: '#fff',
+    fontSize: screenWidth * 0.035,
+    marginBottom: screenHeight * 0.01,
+    fontFamily: 'Poppins',
+  },
+  passwordWrapper: {
+    marginTop: screenHeight * 0.03,
   },
   passwordBox: {
-    backgroundColor: "#1689FE1F",
-    width: "100%",
-    height: 45,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    marginBottom: 5,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    borderColor: "#FFD748",
+    borderWidth: 1,
+    borderRadius: screenWidth * 0.01,
+    backgroundColor: 'rgba(15,15,15,0.08)',
   },
-  inputPassword: {
+  passwordInput: {
     flex: 1,
     color: "#fff",
-    fontSize: 12,
+    height: screenHeight * 0.07,
+    paddingHorizontal: screenWidth * 0.05,
+    fontFamily: 'Inter',
+    fontSize: screenWidth * 0.035,
   },
-  eyeIcon: {
-    paddingHorizontal: 8,
-    width: 20,
-    resizeMode: 'contain'
+  eyeButton: {
+    paddingHorizontal: screenWidth * 0.03,
   },
-  btn: {
-    backgroundColor: "#2ea8ff",
-    paddingVertical: 15,
-    width: "75%",
-    alignItems: "center",
-    borderRadius: 30,
-    marginTop: 30
+  eyeImage: {
+    width: screenWidth * 0.05,
+    height: screenWidth * 0.05,
+    resizeMode: 'contain',
   },
-  btnText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
-  }
+  buttonView: {
+    marginTop: screenHeight * 0.04,
+  },
+  button: {
+    width: '100%',
+    paddingVertical: screenHeight * 0.02,
+    borderRadius: screenWidth * 0.13,
+    borderWidth: 2,
+    borderColor: '#FFD748',
+    backgroundColor: '#010000',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: screenWidth * 0.045,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+  },
+  signupText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: screenWidth * 0.03,
+    marginTop: screenHeight * 0.02,
+  },
+  signupLink: {
+    color: "#FFD748",
+    fontWeight: 'bold',
+  },
+  error: {
+    color: "#ff5c5c",
+    fontSize: screenWidth * 0.03,
+    marginTop: 5,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#000000a1',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    paddingHorizontal: screenWidth * 0.08,
+    paddingTop: 50,
+    paddingBottom: 60,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 72, 0.2)',
+  },
+  successCircle: {
+   
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  checkMark: {
+    color: '#fff',
+    fontSize: 40,
+    fontWeight: '300',
+  },
+  modalTitleText: {
+    color: '#fff',
+    fontSize: screenWidth * 0.055,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: 30,
+    fontFamily: 'Clash Display',
+  },
+  modalButton: {
+    width: '100%',
+    paddingVertical: screenHeight * 0.02,
+    borderRadius: screenWidth * 0.13,
+    borderWidth: 2,
+    borderColor: '#FFD748',
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: screenWidth * 0.04,
+    fontWeight: '800',
+  },
 });
+
+export default ResetYourPassword;

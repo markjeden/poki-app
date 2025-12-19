@@ -21,6 +21,7 @@ import WelcomeImage from "./../../assets/images/logo.png";
 import Collector from "./../../assets/images/collector.png"
 import Creator from "./../../assets/images/creator.png"
 import Vendor from "./../../assets/images/vendor.png"
+import { screenHeight, screenWidth } from '../../utils/Constants';
 
 type RoleId = 'collector' | 'vendor' | 'creator';
 
@@ -124,7 +125,9 @@ const styles = StyleSheet.create({
     wrapper: {
         backgroundColor: '#000000ff',
         flex: 1,
-        padding: 40
+        // padding: 40
+        paddingHorizontal: screenWidth * 0.05,
+        paddingVertical: screenHeight * 0.03,
     },
     titleView: {
         flexDirection: 'row',

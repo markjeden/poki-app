@@ -106,7 +106,7 @@ function Login(): React.JSX.Element {
           <RingSwitch value={enabled} onChange={setEnabled} />
           <Text style={styles.rememberText}>Remember me</Text>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('forgot-password')}>
           <Text style={styles.forgotText}>Forgot Password?</Text>
         </TouchableOpacity>
       </View>

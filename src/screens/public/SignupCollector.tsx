@@ -233,7 +233,9 @@ const styles = StyleSheet.create({
     wrapper: {
         backgroundColor: '#000000ff',
         flex: 1,
-        padding: 40
+        // padding: 40
+        paddingHorizontal: screenWidth * 0.05,
+        paddingVertical: screenHeight * 0.03,
     },
     scrollContainer: {
         // paddingHorizontal: screenWidth * 0.06,
